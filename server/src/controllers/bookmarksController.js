@@ -1,26 +1,32 @@
 const express = require('express');
+const db = require('../models/bookmarks_db')
+
 const router = express.Router();
-const bookmarks = [];
-let currentId = 1;
 
 router.get('/', (req, res)=> {
-    res.send(bookmarks)
+    db.getAllBookmarks((rows)=> {
+        res.json(rows);
+    })
 });
 
 router.post('/',(req, res)=> {
-    let bm = req.body
-    bm.id = currentId++;
-    bookmarks.push(bm)
-    res.sendStatus(200);
+    db.createBookmark(req.body.url, ()=> {
+        res.sendStatus(200);
+    })
 });
 
 router.get('/:id', (req,res)=>{
-    const bm = bookmarks.filter(b => b.id === parseInt(req.params.id));
-    res.send(bm)
+    db.getBookmarkById(parseInt(req.params.id), (row) => {
+        if(row) {
+            res.json(row);
+        } else {
+            res.sendStatus(404);
+        }
+    })
 });
 
 router.delete('/:id', (req,res) => {
-    const bm = bookmarks.filter(b => b.id === parseInt(req.params.id));
+    db.deleteBookmark(parseInt(req.params.id))
     res.sendStatus(200);
 });
 
